@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -6,49 +6,132 @@ import {
   Button,
   Switch,
   Image,
-  ScrollView,
   StyleSheet,
-  Alert
+  Alert,
+  FlatList,
+  StatusBar,
+  TouchableOpacity,
+  BackHandler,
+  ToastAndroid,
+  PermissionsAndroid,
+  DrawerLayoutAndroid,
+  
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
+// =========================
+// 📌 TIPOS
+// =========================
+type ItemData = {
+  id: string;
+  title: string;
+};
+
+type ItemProps = {
+  item: ItemData;
+};
+
+// =========================
+// 🚀 APP
+// =========================
 export default function App() {
 
-  // Estados
+  // =========================
+  // 📌 DATA
+  // =========================
+  const DATA: ItemData[] = [
+    { id: '1', title: 'First Item' },
+    { id: '2', title: 'Second Item' },
+    { id: '3', title: 'Third Item' },
+  ];
+
+  // =========================
+  // 📌 ESTADOS
+  // =========================
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [nombre, setNombre] = useState('');
   const [edad, setEdad] = useState('');
   const [activo, setActivo] = useState(false);
   const [mensaje, setMensaje] = useState('');
+  const drawerRef = useRef<DrawerLayoutAndroid>(null);
 
-  // Función del botón
+  // =========================
+  // 📌 EFECTOS (ANDROID)
+  // =========================
+  useEffect(() => {
+    const backAction = () => {
+      ToastAndroid.show("Presionaste atrás", ToastAndroid.SHORT);
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    const pedirPermiso = async () => {
+      try {
+        await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.CAMERA
+        );
+      } catch (e) {
+        console.log(e);
+      }
+    };
+
+    pedirPermiso();
+
+    return () => backHandler.remove();
+  }, []);
+
+  // =========================
+  // 📌 FUNCIONES
+  // =========================
   const mostrarMensaje = () => {
     const texto = `Hola ${nombre}, tienes ${edad} años`;
     setMensaje(texto);
     Alert.alert("Información", texto);
   };
 
-  return (
-    <ScrollView contentContainerStyle={styles.scrollContainer}>
+  // =========================
+  // 📌 ITEM LISTA
+  // =========================
+  const Item = ({ item }: ItemProps) => {
+    const isSelected = item.id === selectedId;
 
-      {/* TÍTULO */}
-      <Text style={styles.titulo}>
-        Componentes de react - 17/04/2026
-      </Text>
-
-      {/* CONTENEDOR PRINCIPAL */}
-      <View style={styles.container}>
-
-        {/* SECCIÓN DE TEXTO */}
-        <Text style={styles.texto}>
-          Nombre: Marlon Aristizabal
+    return (
+      <TouchableOpacity
+        style={[
+          styles.item,
+          { backgroundColor: isSelected ? '#6e3b6e' : '#f9c2ff' }
+        ]}
+        onPress={() => setSelectedId(item.id)}
+      >
+        <Text style={{ color: isSelected ? '#fff' : '#000', fontSize: 18 }}>
+          {item.title}
         </Text>
-        <Text style={styles.texto}>
-          Taller: Componentes React Native
-        </Text>
-        <Text style={styles.texto}>
-          Fecha: 17/04/2026
-        </Text>
+      </TouchableOpacity>
+    );
+  };
 
-        {/* INPUTS */}
+  // =========================
+  // 📌 HEADER (FORMULARIO)
+  // =========================
+const Header = () => (
+  <View>
+    
+    <Button
+      title="☰ Abrir menú"
+      onPress={() => drawerRef.current?.openDrawer()}
+    />
+
+    <Text style={styles.titulo}>
+      Componentes React Native
+    </Text>
+
+    <View style={styles.card}></View>
+
+      <View style={styles.card}>
         <TextInput
           style={styles.input}
           placeholder="Ingrese su nombre"
@@ -64,146 +147,112 @@ export default function App() {
           onChangeText={setEdad}
         />
 
-        {/* BOTÓN */}
-        <View style={styles.boton}>
-          <Button title="Mostrar mensaje" onPress={mostrarMensaje} />
-        </View>
+        <Button title="Mostrar mensaje" onPress={mostrarMensaje} />
 
-        {/* MENSAJE EN PANTALLA */}
-        <Text style={styles.mensaje}>
-          {mensaje}
-        </Text>
+        <Text style={styles.mensaje}>{mensaje}</Text>
 
-        {/* SWITCH */}
         <View style={styles.switchContainer}>
-          <Text style={styles.texto}>
-            Estado:
-          </Text>
-          <Switch
-            value={activo}
-            onValueChange={setActivo}
-          />
+          <Text>Estado:</Text>
+          <Switch value={activo} onValueChange={setActivo} />
         </View>
 
-        <Text style={styles.texto}>
-          {activo ? "Activado" : "Desactivado"}
-        </Text>
-
-        <Text style={styles.texto}>
-  Hola (para probar el scroll)
-        </Text>
-              <Text style={styles.texto}>
-  Hola
-        </Text>
-              <Text style={styles.texto}>
-  Hola
-        </Text>
-              <Text style={styles.texto}>
-  Hola
-        </Text>
-              <Text style={styles.texto}>
-  Hola
-        </Text>
-              <Text style={styles.texto}>
-  Hola
-        </Text>
-              <Text style={styles.texto}>
-  Hola
-        </Text>
-              <Text style={styles.texto}>
-  Hola
-        </Text>
-              <Text style={styles.texto}>
-  Hola
-        </Text>
-              <Text style={styles.texto}>
-  Hola
-        </Text>
-              <Text style={styles.texto}>
-  Hola
-        </Text>
-              <Text style={styles.texto}>
-  Hola
-        </Text>
-              <Text style={styles.texto}>
-  Hola
-        </Text>
-              <Text style={styles.texto}>
-  Hola
-        </Text>
-              <Text style={styles.texto}>
-  Hola
-        </Text>
-              <Text style={styles.texto}>
-  Hola
-        </Text>
-              <Text style={styles.texto}>
-  Hola
-        </Text>
-              <Text style={styles.texto}>
-  Hola
-        </Text>
-              <Text style={styles.texto}>
-  Hola
-        </Text>
-              <Text style={styles.texto}>
-  Hola
-        </Text>
-              <Text style={styles.texto}>
-  Hola
-        </Text>
-        {/* IMAGEN */}
-        <Image
-          style={styles.imagen}
-          source={{
-            uri: 'https://i.pinimg.com/280x280_RS/48/98/1e/48981e32b43f3df2489a57f1006b3b4f.jpg'
-          }}
-        />
-
+        <Text>{activo ? "Activado" : "Desactivado"}</Text>
       </View>
-    </ScrollView>
+
+      <Text style={styles.subtitulo}>Lista</Text>
+    </View>
+  );
+
+  // =========================
+  // 📌 FOOTER
+  // =========================
+  const Footer = () => (
+    <View style={{ alignItems: 'center', marginTop: 20 }}>
+      <Image
+        style={styles.imagen}
+        source={{
+          uri: 'https://i.pinimg.com/280x280_RS/48/98/1e/48981e32b43f3df2489a57f1006b3b4f.jpg'
+        }}
+      />
+    </View>
+  );
+
+  // =========================
+  // 📌 DRAWER
+  // =========================
+  const drawer = (
+    <View style={{ flex: 1, padding: 20 }}>
+      <Text style={{ fontSize: 18 }}>Menú</Text>
+
+      <Button
+        title="Mostrar Toast"
+        onPress={() =>
+          ToastAndroid.show("que hay de nuevo viejo?", ToastAndroid.SHORT)
+        }
+      />
+    </View>
+  );
+
+  // =========================
+  // 📌 RENDER
+  // =========================
+  return (
+ <DrawerLayoutAndroid
+  ref={drawerRef}
+  drawerWidth={250}
+  drawerPosition="left"
+  renderNavigationView={() => drawer}
+>
+
+      <SafeAreaView style={styles.container}>
+        <FlatList
+          data={DATA}
+          renderItem={({ item }) => <Item item={item} />}
+          keyExtractor={item => item.id}
+          ListHeaderComponent={<Header />}
+          ListFooterComponent={<Footer />}
+          contentContainerStyle={{ paddingBottom: 20 }}
+          extraData={selectedId}
+        />
+      </SafeAreaView>
+    </DrawerLayoutAndroid>
   );
 }
 
-// ESTILOS
+// =========================
+// 🎨 ESTILOS
+// =========================
 const styles = StyleSheet.create({
-
-  scrollContainer: {
-    alignItems: 'center',
-    padding: 20
+  container: {
+    flex: 1,
+    marginTop: StatusBar.currentHeight || 0,
+    paddingHorizontal: 15,
   },
 
   titulo: {
     fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 15
+    marginBottom: 15,
+    textAlign: 'center'
   },
 
-  container: {
-    width: '90%',
+  subtitulo: {
+    fontSize: 18,
+    marginVertical: 10
+  },
+
+  card: {
     backgroundColor: '#f2f2f2',
-    padding: 20,
-    borderRadius: 15,
-    alignItems: 'center'
-  },
-
-  texto: {
-    fontSize: 16,
-    marginBottom: 5
+    padding: 15,
+    borderRadius: 10
   },
 
   input: {
-    width: '100%',
     borderWidth: 1,
     borderColor: '#999',
     borderRadius: 10,
     padding: 10,
     marginTop: 10
-  },
-
-  boton: {
-    marginTop: 15,
-    width: '100%'
   },
 
   mensaje: {
@@ -214,7 +263,14 @@ const styles = StyleSheet.create({
   switchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     marginTop: 15
+  },
+
+  item: {
+    padding: 15,
+    borderRadius: 10,
+    marginVertical: 8
   },
 
   imagen: {
@@ -222,5 +278,4 @@ const styles = StyleSheet.create({
     height: 100,
     marginTop: 20
   }
-
 });
